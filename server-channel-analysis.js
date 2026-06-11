@@ -270,7 +270,7 @@ ${channelData.sampleTitles.map((t, i) => `  ${i + 1}. ${t}`).join('\n')}
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 4000,
+        max_tokens: 8000,
         system: SYSTEM_PROMPT,
         messages: [{ role: 'user', content: userPrompt }]
       })
@@ -336,7 +336,7 @@ ${(idea.outline || []).map((p, i) => `  ${i + 1}. ${p}`).join('\n')}
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 64000,
+        max_tokens: 3000,
         system: SCRIPT_SYSTEM_PROMPT,
         messages: [{ role: 'user', content: userPrompt }]
       })
