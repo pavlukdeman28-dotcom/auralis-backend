@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auralis Clone — генератор контент-стратегії (тест)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0F1115;
+    --surface: #1A1D24;
+    --surface-2: #20242D;
+    --line: #2E323C;
+    --text: #F5F4F0;
+    --muted: #9298A8;
+    --accent: #D9F25C;
+    --accent-2: #7C7CFF;
+    --accent-3: #FF8A65;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 15% -10%, rgba(124,124,255,0.12), transparent 60%),
+      radial-gradient(1000px 500px at 90% 10%, rgba(217,242,92,0.08), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .container{max-width:760px;margin:0 auto;padding:48px 24px 80px;}
+
+  .logo{display:flex;align-items:center;gap:10px;font-family:'Sora',sans-serif;font-weight:700;font-size:20px;letter-spacing:-0.02em;margin-bottom:8px;}
+  .logo-mark{
+    width:34px;height:34px;border-radius:11px;
+    background:linear-gradient(135deg, var(--accent) 0%, #b9d94a 100%);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--bg);font-weight:800;font-size:16px;
+    box-shadow:0 6px 16px -6px rgba(217,242,92,0.5);
+  }
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);
+    background:var(--surface);border:1px solid var(--line);border-radius:999px;
+    padding:8px 16px;margin:20px 0;
+  }
+  .eyebrow::before{
+    content:"";width:7px;height:7px;border-radius:50%;background:var(--accent);
+    display:inline-block;box-shadow:0 0 0 4px rgba(217,242,92,0.15);
+  }
+  h1{
+    font-family:'Sora',sans-serif;font-weight:800;
+    font-size:clamp(28px,4vw,40px);line-height:1.1;letter-spacing:-0.03em;
+    margin-bottom:12px;
+  }
+  p.lead{color:var(--muted);font-size:15px;max-width:560px;margin-bottom:32px;}
+
+  /* Form card */
+  .form-card{
+    background:linear-gradient(160deg, var(--surface) 0%, var(--surface-2) 100%);
+    border:1px solid var(--line);border-radius:24px;
+    padding:32px;margin-bottom:24px;
+  }
+  .field{margin-bottom:20px;}
+  .field:last-child{margin-bottom:0;}
+  label{
+    display:block;font-size:13px;color:var(--muted);margin-bottom:8px;
+    font-family:'JetBrains Mono',monospace;
+  }
+  input[type="text"], textarea{
+    width:100%;padding:12px 16px;font-size:14px;
+    background:var(--bg);border:1px solid var(--line);border-radius:12px;
+    color:var(--text);font-family:'Inter',sans-serif;
+    resize:vertical;
+  }
+  input[type="text"]:focus, textarea:focus{
+    outline:1px solid var(--accent-2);border-color:var(--accent-2);
+  }
+  textarea{min-height:90px;}
+  .hint{font-size:12px;color:var(--muted);margin-top:6px;}
+
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media (max-width:600px){.field-row{grid-template-columns:1fr;}}
+
+  /* Buttons */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    padding:13px 26px;font-size:14px;font-weight:600;
+    border:none;border-radius:999px;cursor:pointer;
+    font-family:'Inter',sans-serif;width:100%;
+    transition:transform 0.25s cubic-bezier(0.22,1,0.36,1), box-shadow 0.25s ease;
+  }
+  .btn:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
+  .btn:hover{transform:translateY(-2px);}
+  .btn-primary{
+    background:var(--accent);color:var(--bg);
+    box-shadow:0 6px 0 0 #9DAE3F, 0 10px 24px -8px rgba(217,242,92,0.45);
+  }
+  .btn-primary:hover{box-shadow:0 8px 0 0 #9DAE3F, 0 14px 30px -8px rgba(217,242,92,0.55);}
+  .btn-primary:active{box-shadow:0 1px 0 0 #9DAE3F;transform:translateY(2px);}
+  .btn-primary:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+  @media (prefers-reduced-motion: reduce){.btn{transition:none;}.btn:hover{transform:none;}}
+
+  /* Loading */
+  .loading{display:none;margin-top:20px;text-align:center;}
+  .loading.active{display:block;}
+  .loading-text{font-size:13px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+  .spinner{
+    width:24px;height:24px;border:3px solid var(--line);border-top-color:var(--accent);
+    border-radius:50%;margin:0 auto 12px;
+    animation:spin 0.8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  @media (prefers-reduced-motion: reduce){.spinner{animation:none;}}
+
+  /* Error */
+  .error-box{
+    display:none;margin-top:16px;
+    background:rgba(255,138,101,0.1);border:1px solid rgba(255,138,101,0.3);
+    border-radius:12px;padding:14px 18px;font-size:13px;color:var(--accent-3);
+  }
+  .error-box.active{display:block;}
+
+  /* Result */
+  .result{display:none;}
+  .result.active{display:block;}
+
+  .formula-card{
+    background:var(--surface);border:1px solid var(--line);border-radius:20px;
+    padding:24px;margin-bottom:20px;
+  }
+  .formula-card h3{
+    font-family:'Sora',sans-serif;font-weight:600;font-size:15px;margin-bottom:14px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .formula-card h3::before{content:"◆";color:var(--accent);font-size:13px;}
+  .formula-row{display:flex;justify-content:space-between;gap:16px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;}
+  .formula-row:last-child{border-bottom:none;}
+  .formula-row .k{color:var(--muted);flex-shrink:0;}
+  .formula-row .v{text-align:right;}
+  .pattern-tag{
+    display:inline-block;font-size:12px;font-family:'JetBrains Mono',monospace;
+    background:rgba(124,124,255,0.12);color:var(--accent-2);
+    border-radius:8px;padding:6px 10px;margin:4px 4px 0 0;
+  }
+
+  .idea-card{
+    background:var(--surface);border:1px solid var(--line);border-radius:20px;
+    padding:24px;margin-bottom:16px;
+    transition:border-color 0.25s ease, transform 0.25s ease;
+  }
+  .idea-card:hover{border-color:var(--accent);transform:translateY(-3px);}
+  .idea-num{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:28px;height:28px;border-radius:9px;
+    background:rgba(217,242,92,0.15);color:var(--accent);
+    font-family:'Sora',sans-serif;font-weight:700;font-size:13px;
+    margin-bottom:14px;
+  }
+  .idea-card .title{font-family:'Sora',sans-serif;font-weight:600;font-size:17px;margin-bottom:8px;}
+  .idea-card .format{
+    display:inline-block;font-size:11px;font-family:'JetBrains Mono',monospace;
+    color:var(--accent-3);background:rgba(255,138,101,0.1);
+    border-radius:999px;padding:4px 12px;margin-bottom:12px;
+  }
+  .idea-card .hook{
+    font-size:14px;color:var(--text);font-style:italic;
+    border-left:2px solid var(--accent);padding-left:12px;margin-bottom:14px;
+  }
+  .idea-card .outline{list-style:none;display:flex;flex-direction:column;gap:8px;}
+  .idea-card .outline li{
+    font-size:13px;color:var(--muted);display:flex;gap:8px;align-items:flex-start;
+  }
+  .idea-card .outline li::before{content:"→";color:var(--accent);flex-shrink:0;}
+
+  .script-btn{
+    margin-top:16px;width:auto;padding:9px 18px;font-size:13px;
+    background:var(--bg);color:var(--accent);border:1px solid var(--line);
+    box-shadow:none;
+  }
+  .script-btn:hover{border-color:var(--accent);box-shadow:none;transform:translateY(-1px);}
+  .script-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+
+  .script-result{
+    display:none;margin-top:18px;padding-top:18px;
+    border-top:1px solid var(--line);
+  }
+  .script-result.active{display:block;}
+  .script-scene{
+    background:var(--bg);border:1px solid var(--line);border-radius:14px;
+    padding:14px 16px;margin-bottom:10px;
+  }
+  .script-scene .scene-name{
+    font-family:'Sora',sans-serif;font-weight:600;font-size:13px;
+    color:var(--accent);margin-bottom:8px;
+  }
+  .script-scene .voiceover{font-size:14px;color:var(--text);margin-bottom:8px;}
+  .script-scene .visual{
+    font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;
+    border-left:2px solid var(--accent-2);padding-left:10px;
+  }
+  .script-meta{
+    display:flex;justify-content:space-between;align-items:center;
+    font-size:12px;color:var(--muted);margin-bottom:14px;
+  }
+  .script-tips{margin-top:14px;}
+  .script-tips .hint{margin-bottom:6px;}
+  .script-tips ul{list-style:none;display:flex;flex-direction:column;gap:6px;}
+  .script-tips ul li{
+    font-size:13px;color:var(--muted);display:flex;gap:8px;align-items:flex-start;
+  }
+  .script-tips ul li::before{content:"💡";flex-shrink:0;font-size:12px;}
+
+  .json-toggle{
+    display:flex;align-items:center;justify-content:space-between;cursor:pointer;
+    font-size:13px;color:var(--muted);padding:14px 0;border-top:1px solid var(--line);margin-top:8px;
+  }
+  .json-toggle:hover{color:var(--text);}
+  .json-raw{
+    display:none;background:var(--bg);border:1px solid var(--line);border-radius:14px;
+    padding:16px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);
+    overflow-x:auto;white-space:pre-wrap;word-break:break-word;max-height:400px;overflow-y:auto;
+  }
+  .json-raw.active{display:block;}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="logo">
+    <div class="logo-mark">A</div>
+    Auralis Clone
+  </div>
+  <div class="eyebrow">Реальний аналіз через ваш сервер</div>
+  <h1>Генератор контент-стратегії</h1>
+  <p class="lead">Вставте посилання на канал-орієнтир та свою нішу — сервер отримає дані каналу через YouTube API і AI згенерує контент-план.</p>
+
+  <div class="form-card">
+    <div class="field">
+      <label>Посилання на канал-орієнтир (YouTube)</label>
+      <input type="text" id="channel-url" placeholder="https://www.youtube.com/@example або @example">
+      <div class="hint">Підтримуються формати youtube.com/@handle, youtube.com/channel/UC..., або просто @handle.</div>
+    </div>
+
+    <div class="field" style="border-top:1px solid var(--line);padding-top:20px;">
+      <label>Ваша ніша</label>
+      <input type="text" id="my-niche" placeholder="наприклад: продуктивність для студентів">
+    </div>
+
+    <div class="field">
+      <label>Тон голосу вашого каналу</label>
+      <input type="text" id="my-tone" placeholder="наприклад: дружній, з гумором, без занудства">
+    </div>
+
+    <div class="field" style="border-top:1px solid var(--line);padding-top:20px;">
+      <label>URL вашого бекенду</label>
+      <input type="text" id="api-url" value="http://localh
+        ost:3000/analyze-channel">
+      <div class="hint">Адреса вашого запущеного сервера.</div>
+    </div>
+
+    <div class="field">
+      <button class="btn btn-primary" id="generate-btn">Проаналізувати канал та згенерувати план</button>
+    </div>
+
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <div class="loading-text" id="loading-text">Отримую дані каналу через YouTube API...</div>
+    </div>
+
+    <div class="error-box" id="error-box"></div>
+  </div>
+
+  <div class="result" id="result">
+    <div class="formula-card">
+      <h3>Формула каналу-орієнтира</h3>
+      <div class="formula-row"><span class="k">Канал</span><span class="v" id="f-channel-name"></span></div>
+      <div class="formula-row"><span class="k">Підписники</span><span class="v" id="f-subs"></span></div>
+      <div class="formula-row"><span class="k">Формат контенту</span><span class="v" id="f-format"></span></div>
+      <div class="formula-row"><span class="k">Частота публікацій</span><span class="v" id="f-frequency"></span></div>
+      <div class="formula-row"><span class="k">Середня тривалість</span><span class="v" id="f-duration"></span></div>
+      <div class="formula-row"><span class="k">Тон контенту</span><span class="v" id="f-tone"></span></div>
+      <div style="margin-top:12px;">
+        <div class="hint" style="margin-bottom:6px;">Патерни заголовків:</div>
+        <div id="f-patterns"></div>
+      </div>
+    </div>
+
+    <div id="ideas-container"></div>
+
+    <div class="json-toggle" id="json-toggle">
+      <span>Показати сирий JSON-результат</span>
+      <span id="json-toggle-arrow">▾</span>
+    </div>
+    <pre class="json-raw" id="json-raw"></pre>
+  </div>
+</div>
+
+<script>
+  const generateBtn = document.getElementById('generate-btn');
+  const loading = document.getElementById('loading');
+  const loadingText = document.getElementById('loading-text');
+  const errorBox = document.getElementById('error-box');
+  const result = document.getElementById('result');
+
+  generateBtn.addEventListener('click', async () => {
+    const channelUrl = document.getElementById('channel-url').value.trim();
+    const myNiche = document.getElementById('my-niche').value.trim();
+    const myTone = document.getElementById('my-tone').value.trim();
+    const apiUrl = document.getElementById('api-url').value.trim();
+
+    if(!channelUrl || !myNiche){
+      showError('Заповніть посилання на канал-орієнтир та свою нішу.');
+      return;
+    }
+    if(!apiUrl){
+      showError('Вкажіть URL вашого бекенду.');
+      return;
+    }
+
+    errorBox.classList.remove('active');
+    result.classList.remove('active');
+    loading.classList.add('active');
+    loadingText.textContent = 'Отримую дані каналу через YouTube API...';
+    generateBtn.disabled = true;
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ channelUrl, myNiche, myTone })
+      });
+
+      const data = await response.json();
+
+      if(!response.ok){
+        throw new Error(data.error || ('Помилка API: ' + response.status));
+      }
+
+      loadingText.textContent = 'Генерую контент-план...';
+      renderResult(data.plan, data.channelInfo);
+    } catch(err){
+      console.error(err);
+      showError('Не вдалося згенерувати план: ' + err.message);
+    } finally {
+      loading.classList.remove('active');
+      generateBtn.disabled = false;
+    }
+  });
+
+  function showError(msg){
+    errorBox.textContent = msg;
+    errorBox.classList.add('active');
+  }
+
+  let currentChannelInfo = null;
+
+  function renderResult(plan, channelInfo){
+    currentChannelInfo = channelInfo;
+    if(channelInfo){
+      document.getElementById('f-channel-name').textContent = channelInfo.title || '—';
+      document.getElementById('f-subs').textContent = channelInfo.subscriberCount || '—';
+      document.getElementById('f-format').textContent = channelInfo.contentFormat || '—';
+    }
+
+    const f = plan.channel_formula || {};
+    document.getElementById('f-frequency').textContent = f.posting_frequency || '—';
+    document.getElementById('f-duration').textContent = f.avg_duration || '—';
+    document.getElementById('f-tone').textContent = f.content_tone || '—';
+
+    const patternsEl = document.getElementById('f-patterns');
+    patternsEl.innerHTML = '';
+    (f.title_patterns || []).forEach(p => {
+      const span = document.createElement('span');
+      span.className = 'pattern-tag';
+      span.textContent = p;
+      patternsEl.appendChild(span);
+    });
+
+    const ideasContainer = document.getElementById('ideas-container');
+    ideasContainer.innerHTML = '';
+    (plan.video_ideas || []).forEach((idea, i) => {
+      const card = document.createElement('div');
+      card.className = 'idea-card';
+
+      const num = document.createElement('div');
+      num.className = 'idea-num';
+      num.textContent = String(i + 1).padStart(2, '0');
+      card.appendChild(num);
+
+      const title = document.createElement('div');
+      title.className = 'title';
+      title.textContent = idea.title || '';
+      card.appendChild(title);
+
+      if(i
+         dea.format){
+        const format = document.createElement('div');
+        format.className = 'format';
+        format.textContent = idea.format;
+        card.appendChild(format);
+      }
+
+      if(idea.hook){
+        const hook = document.createElement('div');
+        hook.className = 'hook';
+        hook.textContent = idea.hook;
+        card.appendChild(hook);
+      }
+
+      if(idea.summary){
+        const summary = document.createElement('p');
+        summary.style.cssText = 'font-size:14px;color:var(--muted);margin-bottom:14px;';
+        summary.textContent = idea.summary;
+        card.appendChild(summary);
+      }
+
+      if(idea.outline && idea.outline.length){
+        const ul = document.createElement('ul');
+        ul.className = 'outline';
+        idea.outline.forEach(point => {
+          const li = document.createElement('li');
+          li.textContent = point;
+          ul.appendChild(li);
+        });
+        card.appendChild(ul);
+      }
+
+      const scriptBtn = document.createElement('button');
+      scriptBtn.className = 'btn script-btn';
+      scriptBtn.textContent = '📋 Відкрити повний план відео';
+
+      const scriptResult = document.createElement('div');
+      scriptResult.className = 'script-result';
+
+      scriptBtn.addEventListener('click', async () => {
+        scriptBtn.disabled = true;
+        scriptBtn.textContent = 'Генерую план...';
+
+        try {
+          const apiUrl = document.getElementById('api-url').value.trim();
+          const scriptApiUrl = apiUrl.replace(/\/analyze-channel\/?$/, '/generate-script');
+          const myTone = document.getElementById('my-tone').value.trim();
+
+          const response = await fetch(scriptApiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              idea,
+              contentFormat: currentChannelInfo ? currentChannelInfo.contentFormatType : 'Long-form',
+              myTone
+            })
+          });
+
+          const data = await response.json();
+          if(!response.ok){
+            throw new Error(data.error || ('Помилка: ' + response.status));
+          }
+
+          renderScript(scriptResult, data.script);
+          scriptBtn.style.display = 'none';
+        } catch(err){
+          console.error(err);
+          scriptResult.innerHTML = '';
+          const errBox = document.createElement('div');
+          errBox.className = 'error-box active';
+          errBox.textContent = 'Не вдалося згенерувати план: ' + err.message;
+          scriptResult.appendChild(errBox);
+          scriptResult.classList.add('active');
+          scriptBtn.disabled = false;
+          scriptBtn.textContent = '📋 Відкрити повний план відео';
+        }
+      });
+
+      card.appendChild(scriptBtn);
+      card.appendChild(scriptResult);
+
+      ideasContainer.appendChild(card);
+    });
+
+    document.getElementById('json-raw').textContent = JSON.stringify(plan, null, 2);
+
+    result.classList.add('active');
+    result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function renderScript(container, script){
+    container.innerHTML = '';
+    container.classList.add('active');
+
+    if(script.estimated_duration){
+      const meta = document.createElement('div');
+      meta.className = 'script-meta';
+      meta.innerHTML = `<span>Повний план відео</span><span>⏱ ${script.estimated_duration}</span>`;
+      container.appendChild(meta);
+    }
+
+    (script.full_script || []).forEach(scene => {
+      const sceneEl = document.createElement('div');
+      sceneEl.className = 'script-scene';
+
+      if(scene.scene){
+        const name = document.createElement('div');
+        name.className = 'scene-name';
+        name.textContent = scene.scene;
+        sceneEl.appendChild(name);
+      }
+
+      if(scene.voiceover){
+        const vo = document.createElement('div');
+        vo.className = 'voiceover';
+        vo.textContent = scene.voiceover;
+        sceneEl.appendChild(vo);
+      }
+
+      if(scene.visual){
+        const vis = document.createElement('div');
+        vis.className = 'visual';
+        vis.textContent = scene.visual;
+        sceneEl.appendChild(vis);
+      }
+
+      container.appendChild(sceneEl);
+    });
+
+    if(script.tips && script.tips.length){
+      const tipsWrap = document.createElement('div');
+      tipsWrap.className = 'script-tips';
+
+      const hint = document.createElement('div');
+      hint.className = 'hint';
+      hint.textContent = 'Поради:';
+      tipsWrap.appendChild(hint);
+
+      const ul = document.createElement('ul');
+      script.tips.forEach(tip => {
+        const li = document.createElement('li');
+        li.textContent = tip;
+        ul.appendChild(li);
+      });
+      tipsWrap.appendChild(ul);
+
+      container.appendChild(tipsWrap);
+    }
+
+    container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  document.getElementById('json-toggle').addEventListener('click', () => {
+    const raw = document.getElementById('json-raw');
+    const arrow = document.getElementById('json-toggle-arrow');
+    raw.classList.toggle('active');
+    arrow.textContent = raw.classList.contains('active') ? '▴' : '▾';
+  });
+</script>
+
+</body>
+</html>
