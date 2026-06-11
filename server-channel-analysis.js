@@ -336,7 +336,7 @@ ${(idea.outline || []).map((p, i) => `  ${i + 1}. ${p}`).join('\n')}
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 16000,
+        max_tokens: 64000,
         system: SCRIPT_SYSTEM_PROMPT,
         messages: [{ role: 'user', content: userPrompt }]
       })
