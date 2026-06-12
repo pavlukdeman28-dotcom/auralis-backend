@@ -557,15 +557,40 @@
         card.appendChild(ul);
       }
 
+      const scriptControls = document.createElement('div');
+      scriptControls.style.cssText = 'display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:16px;';
+
+      const durationSelect = document.createElement('select');
+      durationSelect.style.cssText = 'padding:9px 14px;font-size:13px;background:var(--bg);border:1px solid var(--line);border-radius:999px;color:var(--text);font-family:Inter,sans-serif;cursor:pointer;';
+
+      function fillDurations(){
+        const fmt = document.getElementById('video-format').value;
+        durationSelect.innerHTML = '';
+        let opts;
+        if(fmt === 'Shorts'){
+          opts = [['15','15 секунд'],['30','30 секунд'],['45','45 секунд'],['60','60 секунд']];
+        } else {
+          opts = [['180','3 хвилини'],['300','5 хвилин'],['480','8 хвилин'],['600','10 хвилин']];
+        }
+        opts.forEach(([v,label]) => {
+          const o = document.createElement('option');
+          o.value = v; o.textContent = label;
+          durationSelect.appendChild(o);
+        });
+      }
+      fillDurations();
+
       const scriptBtn = document.createElement('button');
       scriptBtn.className = 'btn script-btn';
-      scriptBtn.textContent = '📋 Відкрити повний план відео';
+      scriptBtn.style.marginTop = '0';
+      scriptBtn.textContent = '📋 Згенерувати повний план';
 
       const scriptResult = document.createElement('div');
       scriptResult.className = 'script-result';
 
-      scriptBtn.addEventListener('click', async () => {
+      async function generateScript(){
         scriptBtn.disabled = true;
+        durationSelect.disabled = true;
         scriptBtn.textContent = 'Генерую план...';
 
         try {
@@ -573,6 +598,7 @@
           const scriptApiUrl = apiUrl.replace(/\/analyze-channel\/?$/, '/generate-script');
           const myTone = document.getElementById('my-tone').value.trim();
           const videoFormat = document.getElementById('video-format').value;
+          const targetDuration = durationSelect.value;
 
           const response = await fetch(scriptApiUrl, {
             method: 'POST',
@@ -580,6 +606,7 @@
             body: JSON.stringify({
               idea,
               contentFormat: videoFormat,
+              targetDuration: parseInt(targetDuration, 10),
               myTone
             })
           });
@@ -590,7 +617,7 @@
           }
 
           renderScript(scriptResult, data.script);
-          scriptBtn.style.display = 'none';
+          scriptBtn.textContent = '🔄 Перегенерувати план';
         } catch(err){
           console.error(err);
           scriptResult.innerHTML = '';
@@ -599,12 +626,19 @@
           errBox.textContent = 'Не вдалося згенерувати план: ' + err.message;
           scriptResult.appendChild(errBox);
           scriptResult.classList.add('active');
+          scriptBtn.textContent = '📋 Згенерувати повний план';
+        } finally {
           scriptBtn.disabled = false;
-          scriptBtn.textContent = '📋 Відкрити повний план відео';
+          durationSelect.disabled = false;
         }
-      });
+      }
 
-      card.appendChild(scriptBtn);
+      scriptBtn.addEventListener('click', generateScript);
+
+      scriptControls.appendChild(durationSelect);
+      scriptControls.appendChild(scriptBtn);
+
+      card.appendChild(scriptControls);
       card.appendChild(scriptResult);
 
       ideasContainer.appendChild(card);
